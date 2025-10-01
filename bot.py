@@ -116,8 +116,12 @@ async def button(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 # --- запуск ---
 def main():
-    TOKEN = "8489566167:AAFyoHBmqTwMsKCbg7EcwsQ2Uy6p92gMUYI"  # вставь реальный токен от BotFather
+    TOKEN = os.getenv("BOT_TOKEN")
+    if not TOKEN:
+        raise ValueError("❌ BOT_TOKEN не найден! Добавь его в Environment Variables Render.")
+
     app = Application.builder().token(TOKEN).build()
+    ...
 
     app.add_handler(CommandHandler("start", start))
     app.add_handler(CommandHandler("get", get))
