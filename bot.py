@@ -112,11 +112,32 @@ async def button(update: Update, context: ContextTypes.DEFAULT_TYPE):
         await query.edit_message_text("Привет 👋! Выбери действие:", reply_markup=main_menu())
 
 # --- запуск ---
-def main():
-    TOKEN = os.getenv("BOT_TOKEN")  # ✅ теперь токен берётся из переменной окружения Render
-    if not TOKEN:
-        raise ValueError("❌ BOT_TOKEN не найден! Добавь его в Environment Variables Render.")
+    import os
+import threading
+from flask import Flask
+from telegram.ext import Application, CommandHandler, CallbackQueryHandler, MessageHandler, filters
 
+# === твои функции ===
+async def start(update, context):
+    await update.message.reply_text("Привет! Я работаю на Render 🚀")
+
+async def get(update, context):
+    await update.message.reply_text("Функция get выполнена")
+
+async def delete(update, context):
+    await update.message.reply_text("Функция delete выполнена")
+
+async def button(update, context):
+    await update.callback_query.answer("Кнопка нажата")
+
+async def handle_message(update, context):
+    await update.message.reply_text(f"Ты написал: {update.message.text}")
+
+# === Telegram Bot ===
+def run_bot():
+    TOKEN = os.getenv("BOT_TOKEN")
+    if not TOKEN:
+        raise ValueError("❌ BOT_TOKEN не найден. Укажи его в Render → Environment.")
     app = Application.builder().token(TOKEN).build()
 
     app.add_handler(CommandHandler("start", start))
@@ -127,5 +148,20 @@ def main():
 
     app.run_polling()
 
+# === Flask (для Render) ===
+app_flask = Flask(__name__)
+
+@app_flask.route('/')
+def home():
+    return "✅ Telegram bot is running on Render!"
+
+def run_flask():
+    port = int(os.environ.get("PORT", 10000))
+    app_flask.run(host="0.0.0.0", port=port)
+
+# === Точка входа ===
 if __name__ == "__main__":
-    main()
+    # Запускаем Flask в отдельном потоке
+    threading.Thread(target=run_flask).start()
+    # Запускаем Telegram-бота
+    run_bot()
