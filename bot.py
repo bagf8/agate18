@@ -137,6 +137,11 @@ def home():
 @app_flask.route(f"/{TOKEN}", methods=["POST"])
 def webhook():
     update = Update.de_json(request.get_json(force=True), application.bot)
+
+    # добавляем проверку и инициализацию
+    if not application.running:
+        asyncio.run(application.initialize())
+
     asyncio.run(application.process_update(update))
     return "ok"
 
