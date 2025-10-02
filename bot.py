@@ -132,4 +132,20 @@ def main():
     app.run_polling()
 
 if __name__ == "__main__":
+
+import os
+import threading
+from http.server import HTTPServer, SimpleHTTPRequestHandler
+
+# Запуск фейкового веб-сервера
+def run_web_server():
+    port = int(os.environ.get("PORT", 10000))  # Render задаёт порт
+    httpd = HTTPServer(("0.0.0.0", port), SimpleHTTPRequestHandler)
+    print(f"Fake web server running on port {port}")
+    httpd.serve_forever()
+
+threading.Thread(target=run_web_server, daemon=True).start()
+
+# --- тут запускаем твоего бота ---
+import bot  # например bot.py, где запускается Telegram/Discord-бот
     main()
