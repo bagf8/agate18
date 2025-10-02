@@ -38,7 +38,6 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user = update.effective_user
     date = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 
-    # сохраняем только ID сообщения и откуда пересылать
     chat_id = update.message.chat_id
     message_id = update.message.message_id
     sender = user.username or user.first_name
@@ -67,9 +66,7 @@ async def get(update: Update, context: ContextTypes.DEFAULT_TYPE):
         if congrats.startswith("MSG::"):
             try:
                 chat_id, message_id, date, sender = congrats.split("::", 1)[1].split("|", 3)
-                # сначала подпись
                 await update.message.reply_text(f"[{i}] от {sender} ({date})")
-                # потом пересылаем
                 await context.bot.copy_message(
                     chat_id=update.effective_chat.id,
                     from_chat_id=chat_id,
@@ -116,12 +113,11 @@ async def button(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 # --- запуск ---
 def main():
-    TOKEN = os.getenv("BOT_TOKEN")
+    TOKEN = os.getenv("BOT_TOKEN")  # ✅ теперь токен берётся из переменной окружения Render
     if not TOKEN:
         raise ValueError("❌ BOT_TOKEN не найден! Добавь его в Environment Variables Render.")
 
     app = Application.builder().token(TOKEN).build()
-    ...
 
     app.add_handler(CommandHandler("start", start))
     app.add_handler(CommandHandler("get", get))
@@ -132,20 +128,4 @@ def main():
     app.run_polling()
 
 if __name__ == "__main__":
-
-import os
-import threading
-from http.server import HTTPServer, SimpleHTTPRequestHandler
-
-# Запуск фейкового веб-сервера
-def run_web_server():
-    port = int(os.environ.get("PORT", 10000))  # Render задаёт порт
-    httpd = HTTPServer(("0.0.0.0", port), SimpleHTTPRequestHandler)
-    print(f"Fake web server running on port {port}")
-    httpd.serve_forever()
-
-threading.Thread(target=run_web_server, daemon=True).start()
-
-# --- тут запускаем твоего бота ---
-import bot  # например bot.py, где запускается Telegram/Discord-бот
     main()
